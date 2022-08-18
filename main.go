@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"image"
 	"io"
@@ -25,10 +26,13 @@ func main() {
 		fileName = os.Args[1]
 	} else {
 		fmt.Println("请输入文件位置：")
-		fmt.Scanf("%s\n", &fileName)
+		fmt.Scanln(&fileName)
 	}
 	fmt.Println("请输入水印文本：")
-	fmt.Scanf("%s\n", &textMark)
+	reader := bufio.NewReader(os.Stdin)
+	textMark, _ = reader.ReadString('\n')
+	textMark = strings.TrimSpace(textMark)
+	fmt.Println(textMark)
 	f, err := excelize.OpenFile(fileName)
 	if err != nil {
 		fmt.Println(err)
@@ -48,12 +52,8 @@ func main() {
 			link, err := f.GetCellFormula(sheetName, axis)
 			if err == nil && link != "" {
 				f.SetRowHeight(sheetName, i+1, 100)
-				err := f.SetCellValue(sheetName, axis, " ")
-				if err != nil {
-					panic("del data error")
-				}
 				link = strings.Split(link, "\"")[1]
-				fmt.Println("正在下载" + link)
+				fmt.Println("正在下载", link, axis)
 				r, err := http.Get(link)
 				if err != nil {
 					panic("下载图片错误")
